@@ -1,0 +1,274 @@
+import win.ui;
+import fsys.dlg.dir;
+import inet.http;
+import inet.downBox;
+import JSON;
+/*DSG{{*/
+mainForm = win.form(text="Github Release 下载器";right=757;bottom=467;max=false)
+mainForm.add(
+button={cls="button";text="直接输入完整地址";left=507;top=49;right=629;bottom=77;z=6};
+button2={cls="button";text="查询";left=639;top=49;right=711;bottom=77;z=7};
+button3={cls="button";text="选择";left=372;top=353;right=413;bottom=376;disabled=1;z=15};
+button4={cls="button";text="开始！";left=481;top=305;right=701;bottom=402;font=LOGFONT(h=-29);z=23};
+checkbox={cls="checkbox";text="使用";left=49;top=311;right=94;bottom=334;z=10};
+checkbox2={cls="checkbox";text="自定义保存路径：";left=49;top=355;right=161;bottom=372;z=13};
+combobox={cls="combobox";left=619;top=79;right=712;bottom=102;edge=1;items={};mode="dropdown";z=20};
+edit={cls="edit";text="仓库名称";left=378;top=53;right=496;bottom=75;color=0xA4A0A0;edge=1;z=5};
+edit2={cls="edit";text="仓库作者";left=240;top=53;right=358;bottom=75;color=0xA4A0A0;edge=1;z=3};
+edit3={cls="edit";left=111;top=48;right=503;bottom=78;edge=1;font=LOGFONT(h=-15);hide=1;multiline=1;z=8};
+edit4={cls="edit";text="https://ghfast.top";left=94;top=311;right=348;bottom=333;disabled=1;edge=1;z=11};
+edit5={cls="edit";left=161;top=352;right=370;bottom=374;disabled=1;edge=1;z=14};
+groupbox={cls="groupbox";text="下载选项";left=37;top=290;right=711;bottom=410;edge=1;z=9};
+listbox2={cls="listbox";left=37;top=106;right=710;bottom=285;edge=1;items={};z=18};
+static={cls="static";text="仓库地址：";left=38;top=45;right=118;bottom=78;align="center";center=1;font=LOGFONT(h=-15);notify=1;transparent=1;z=1};
+static10={cls="static";text="还没有进行查询";left=85;top=82;right=554;bottom=101;font=LOGFONT(h=-13);transparent=1;z=22};
+static2={cls="static";text="https://github.com /";left=120;top=53;right=238;bottom=75;font=LOGFONT(h=-13);transparent=1;z=2};
+static3={cls="static";text="/";left=366;top=53;right=391;bottom=83;font=LOGFONT(h=-13);notify=1;transparent=1;z=4};
+static5={cls="static";text="进行加速下载";left=348;top=315;right=423;bottom=334;transparent=1;z=12};
+static6={cls="static";text="(默认保存在软件启动目录的github-release文件夹下)";left=66;top=374;right=346;bottom=391;transparent=1;z=16};
+static7={cls="static";text="结果：";left=40;top=79;right=138;bottom=101;font=LOGFONT(h=-16);transparent=1;z=19};
+static8={cls="static";text="(URL将不会被构造，而是使用官方链接)";left=37;top=417;right=711;bottom=434;transparent=1;z=17};
+static9={cls="static";text="版本：";left=578;top=80;right=654;bottom=102;font=LOGFONT(h=-14);transparent=1;z=21}
+)
+/*}}*/
+
+release_tags = {}
+release_download_url = {}
+mainForm.edit2.onFocusGot = function(){ 
+	if (mainForm.edit2.text == "仓库作者") {
+		mainForm.edit2.text = "";
+		mainForm.edit2.color = "black";
+	}
+}
+mainForm.edit2.onFocusLost = function(){ 
+	if (mainForm.edit2.text == "") {
+		mainForm.edit2.text = "仓库作者";
+		mainForm.edit2.color = 0xA4A0A0;
+	}
+}
+mainForm.edit.onFocusGot = function(){ 
+	if (mainForm.edit.text == "仓库名称") {
+		mainForm.edit.text = "";
+		mainForm.edit.color = "black";
+	}
+}
+mainForm.edit.onFocusLost = function(){ 
+	if (mainForm.edit.text == "") {
+		mainForm.edit.text = "仓库名称";
+		mainForm.edit.color = 0xA4A0A0;
+	}
+}
+
+mainForm.button.oncommand = function(id,event){
+	if (mainForm.edit3.hide == 1) {
+		mainForm.edit3.hide = 0;
+		mainForm.edit.hide = 1;
+		mainForm.edit2.hide = 1;
+		mainForm.static3.hide = 1;
+		mainForm.static2.hide = 1;
+		mainForm.button.text = "输入作者和名称"
+	} else {
+		mainForm.edit3.hide = 1;
+		mainForm.edit.hide = 0;
+		mainForm.edit2.hide = 0;
+		mainForm.static3.hide = 0;
+		mainForm.static2.hide = 0;
+		mainForm.button.text = "直接输入完整地址"
+	}
+}
+
+mainForm.checkbox.oncommand = function(id,event){
+	if (mainForm.checkbox.checked == true) {
+		mainForm.edit4.disabled = false;
+	} else {
+		mainForm.edit4.disabled = true;
+	}
+	if (mainForm.checkbox.checked == true && 
+		mainForm.edit4.text != "" && 
+		(string.startsWith(mainForm.edit4.text, "https://",true) || 
+		 string.startsWith(mainForm.edit4.text, "http://",true))) {
+		mainForm.static8.text = "(URL将为:" + mainForm.edit4.text + "/https://github.com/xxxx/xxxxx/xxxx"
+	} else {
+		mainForm.static8.text = "(URL将使用官方链接)"
+	}
+}
+
+mainForm.checkbox2.oncommand = function(id,event){
+	if (mainForm.checkbox2.checked == true) {
+		mainForm.edit5.disabled = false;
+		mainForm.button3.disabled = false;
+	} else {
+		mainForm.edit5.disabled = true;
+		mainForm.button3.disabled = true;
+	}
+}
+
+mainForm.button3.oncommand = function(id,event){
+	mainForm.edit5.text = fsys.dlg.dir()
+}
+
+mainForm.edit4.oncommand = function(id,event){
+	if (mainForm.checkbox.checked == true && 
+		mainForm.edit4.text != "" && 
+		(string.startsWith(mainForm.edit4.text, "https://",true) || 
+		 string.startsWith(mainForm.edit4.text, "http://",true))) {
+		mainForm.static8.text = "(URL将为:" + mainForm.edit4.text + "/https://github.com/xxxx/xxxxx/xxxx"
+	} else {
+		mainForm.static8.text = "(URL将使用官方链接)"
+	}
+}
+
+mainForm.button2.oncommand = function(id,event){
+    // 禁用按钮防止重复点击
+    mainForm.button2.disabled = true;
+    mainForm.static10.text = "正在处理...";
+    
+    var url;
+    if (mainForm.button.text == "直接输入完整地址") {
+        owners = mainForm.edit2.text
+        repo = mainForm.edit.text
+        
+        // 验证输入
+        if (#owners == 0 || #repo == 0) {
+            mainForm.static10.text = "请输入仓库所有者和仓库名称！"
+            return;
+        }
+        
+        url = "https://api.github.com/repos/" + owners + "/" + repo + "/releases";
+    } else {
+        var githubUrl = string.trim(mainForm.edit3.text, "/");
+
+        // 保持原有的匹配代码不变
+        pattern = "(github.com/([^/]+)/([^/?]+))/?";
+        i, owners, repo = string.match(githubUrl, pattern);
+        
+        // 检查匹配结果
+        if (!owners or !repo) {
+            mainForm.msgbox("GitHub仓库地址格式不正确！\n请确保是类似：https://github.com/owner/repo 的格式", "错误");
+            return;
+        }
+        
+        url = "https://api.github.com/repos/" + owners + "/" + repo + "/releases";
+    }
+    
+    mainForm.static10.text = "正在请求: " + url;
+    
+    // 添加请求超时和用户代理
+    var http = inet.http();
+    http.timeout = 10000; // 10秒超时
+    http.addHeaders = {
+        ["User-Agent"] = "Aardio-App/1.0";
+    };
+    
+    var response, headers, status = http.get(url);
+    
+    if (!response) {
+        mainForm.static10.text = "网络请求失败！状态码: " + tostring(http.statusCode)
+        return;
+    }
+    
+    // 检查HTTP状态码
+    if (http.statusCode != 200) {
+        if (http.statusCode == 404) {
+            mainForm.static10.text = "仓库不存在或没有tags！"
+        } else if (http.statusCode == 403) {
+            mainForm.static10.text = "API请求频率限制，请稍后重试！"
+        } else {
+            mainForm.static10.text = "请求失败！HTTP状态码: " + tostring(status)
+        }
+        mainForm.button2.disabled = false;
+        return;
+    }
+    
+    // 解析JSON响应
+    tagsData = JSON.parse(response);
+    // 清空combobox并添加tags
+    mainForm.combobox.clear();
+    for(i, tag in tagsData) {
+        release_tags[tag.tag_name] = "https://api.github.com/repos/"  + owners + "/" + repo + "/releases/" + tostring(tag.id) + "/assets"
+        mainForm.combobox.add(tag.tag_name);
+    }
+    
+    // 如果有tags，选择第一个
+    if (#tagsData > 0) {
+        mainForm.combobox.selIndex = 1;
+    }
+    
+    // 更新状态显示
+    mainForm.static10.text = "成功获取到 " + #tagsData + " 个tags";
+    
+	mainForm.button2.disabled = false;
+}
+
+mainForm.combobox.oncommand = function(id,event){
+	mainForm.listbox2.clear()
+	url = release_tags[mainForm.combobox.selText]
+	// 添加请求超时和用户代理
+        var http = inet.http();
+        http.timeout = 10000; // 10秒超时
+        http.addHeaders = {
+            ["User-Agent"] = "Aardio-App/1.0";
+        };
+        
+        var response, headers, status = http.get(url);
+        
+        if (!response) {
+            mainForm.static10.text = "网络请求失败！状态码: " + tostring(http.statusCode)
+            return;
+        }
+        
+        // 检查HTTP状态码
+        if (http.statusCode != 200) {
+            if (http.statusCode == 404) {
+                mainForm.static10.text = "仓库不存在或没有tags！"
+            } else if (http.statusCode == 403) {
+                mainForm.static10.text = "API请求频率限制，请稍后重试！"
+            } else {
+                mainForm.static10.text = "请求失败！HTTP状态码: " + tostring(status)
+            }
+            return;
+        }
+        
+        // 解析JSON响应
+        assetsData = JSON.parse(response);
+        
+        for(i, tag in assetsData) {
+            mainForm.listbox2.add(tag.name)
+            release_download_url[tag.name] = tag.browser_download_url
+        }
+}
+
+mainForm.button4.oncommand = function(id,event){
+	if (mainForm.checkbox.checked) {
+		url = mainForm.edit4.text + "/" + release_download_url[mainForm.listbox2.selText]
+	} else {
+		url = release_download_url[mainForm.listbox2.selText]
+	}
+	download = inet.downBox(mainForm,"下载弹窗")
+	if (mainForm.checkbox2.checked) {
+		path = mainForm.edit5.text
+	} else {
+		path = ".\github-release\"
+	}
+	download.download(url, path)
+	if (download.complete) {
+		mainForm.static10.text = "下载成功！"
+	}
+}
+
+mainForm.listbox2.oncommand = function(id,event){
+	if (mainForm.checkbox.checked) {
+		if (mainForm.listbox2.selText == null) {
+			mainForm.static8.text = "(URL将为:" + mainForm.edit4.text + "/https://github.com/xxxx/xxxxx/xxxx)"
+		} else {
+			mainForm.static8.text = "(URL将为:" + mainForm.edit4.text + "/" + mainForm.listbox2.selText + ")"
+		}
+	} else {
+		if (mainForm.listbox2.selText != null) {
+			mainForm.static8.text = "(URL将为:" + release_download_url[mainForm.listbox2.selText] + ")"
+		}
+	}
+}
+
+mainForm.show();
+return win.loopMessage();
