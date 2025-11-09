@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<project ver="10" name="云湖" libEmbed="true" icon="C:\Users\Administrator\Downloads\github-6980894_1280.ico" ui="win" output="Github Release Downloader.exe" CompanyName="" FileDescription="" LegalCopyright="Copyright (C) ShanFishApp 2025" ProductName="" InternalName="" FileVersion="1.0.0.1" ProductVersion="1.0.0.1" publishDir="/dist/" dstrip="false">
+<project ver="10" name="github release downloader" libEmbed="true" icon="C:\Users\Administrator\Downloads\github-6980894_1280.ico" ui="win" output="Github Release Downloader.exe" CompanyName="" FileDescription="" LegalCopyright="Copyright (C) ShanFishApp 2025" ProductName="" InternalName="" FileVersion="1.0.0.2" ProductVersion="1.0.0.2" publishDir="/dist/" dstrip="false">
 	<file name="main.aardio" path="main.aardio" comment="main.aardio"/>
 	<folder name="资源文件" path="res" embed="true" local="false" ignored="false"/>
 	<folder name="窗体文件" path="dlg" comment="目录" embed="true"/>
